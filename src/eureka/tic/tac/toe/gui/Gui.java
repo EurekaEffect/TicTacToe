@@ -12,12 +12,23 @@ import java.util.Objects;
 import java.util.Random;
 
 public class Gui extends JFrame {
+    private final Font font = new Font("Bryndan Write", Font.PLAIN, 150);
     public List<JButton> buttons = new ArrayList<>();
     public boolean ready = false;
 
+    private boolean finished = false;
+
     public void start() {
+        new Timer(50, action -> {
+            if (!"None".equals(getWinner()) && !finished) {
+                JOptionPane.showMessageDialog(null,
+                        (getWinner().equals("X") ? "Player wins!" : (getWinner().equals("O") ? "Bot wins!" : "Draw!")));
+                finished = true;
+            }
+        }).start();
+
         this.setTitle("TicTacToe");
-        this.setBounds(100,50, 600, 600);
+        this.setBounds(100, 50, 600, 600);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setResizable(false);
         this.getContentPane().setBackground(Color.LIGHT_GRAY);
@@ -32,9 +43,9 @@ public class Gui extends JFrame {
             button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (ready || (Objects.equals(button.getText(), "O"))) return;
+                    if (!"None".equals(getWinner()) || ready || (Objects.equals(button.getText(), "O") || Objects.equals(button.getText(), "X"))) return;
                     button.setText("X");
-                    button.setFont(new Font("Bryndan Write", Font.PLAIN, 150));
+                    button.setFont(font);
                     ready = true;
 
                     new Thread(() -> {
@@ -45,7 +56,7 @@ public class Gui extends JFrame {
 
                             JButton button = empty.get(new Random().nextInt(empty.size() - 1));
                             button.setText("O");
-                            button.setFont(new Font("Bryndan Write", Font.PLAIN, 150));
+                            button.setFont(font);
 
                             ready = false;
                         } catch (InterruptedException ex) {
@@ -60,5 +71,40 @@ public class Gui extends JFrame {
         for (JButton button : buttons) this.add(button);
         this.setLayout(new GridLayout(3, 3));
         this.setVisible(true);
+    }
+
+    private String getWinner() {
+        List<List<Integer>> places = List.of(
+                List.of(1, 2, 3),
+                List.of(4, 5, 6),
+                List.of(7, 8, 9),
+                List.of(1, 4, 7),
+                List.of(2, 5, 8),
+                List.of(3, 6, 7),
+                List.of(1, 5, 9),
+                List.of(3, 5, 7)
+        );
+
+        for (List<Integer> place : places) {
+            if ("None".equals(winner(place.get(0), place.get(1), place.get(2)))) continue;
+
+            return winner(place.get(0), place.get(1), place.get(2));
+        }
+
+        if (isEmpty()) return "Draw";
+        return "None";
+    }
+
+    private String winner(int one, int two, int three) {
+        for (String player : List.of("X", "O")) {
+            if (Objects.equals(buttons.get(one - 1).getText(), player) && Objects.equals(buttons.get(two - 1).getText(), player) && Objects.equals(buttons.get(three - 1).getText(), player))
+                return player;
+        }
+
+        return "None";
+    }
+
+    private boolean isEmpty() {
+        return buttons.stream().filter(button -> button.getText().isEmpty()).toList().isEmpty();
     }
 }
