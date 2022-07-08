@@ -75,12 +75,17 @@ public class Gui extends JFrame {
 
     private String getWinner() {
         List<List<Integer>> places = List.of(
+                // Horizontal
                 List.of(1, 2, 3),
                 List.of(4, 5, 6),
                 List.of(7, 8, 9),
+
+                // Vertical
                 List.of(1, 4, 7),
                 List.of(2, 5, 8),
                 List.of(3, 6, 7),
+
+                // Diagonal
                 List.of(1, 5, 9),
                 List.of(3, 5, 7)
         );
