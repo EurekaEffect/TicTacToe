@@ -18,11 +18,18 @@ public class Button {
         });
     }
 
-    public Button transparent() {
+    public Button panel() {
         jButton.setBorderPainted(true);
         jButton.setFocusPainted(false);
         jButton.setContentAreaFilled(false);
         jButton.setOpaque(true);
+        return this;
+    }
+
+    public Button transparent() {
+        jButton.setContentAreaFilled(false);
+        jButton.setBorderPainted(false);
+        jButton.setFocusable(false);
         return this;
     }
 

@@ -13,17 +13,31 @@ import java.util.Random;
 
 public class Gui extends JFrame {
     private final Font font = new Font("Bryndan Write", Font.PLAIN, 150);
+    public JMenuBar jMenuBar = new JMenuBar();
+
+    public JButton playerWins = new Button().transparent().get();
+    public JButton botWins = new Button().transparent().get();
+
     public List<JButton> buttons = new ArrayList<>();
     public boolean ready = false;
 
-    private boolean finished = false;
+    private final int[] wins = new int[]{0, 0};
 
     public void start() {
-        new Timer(50, action -> {
-            if (!"None".equals(getWinner()) && !finished) {
-                JOptionPane.showMessageDialog(null,
-                        (getWinner().equals("X") ? "Player wins!" : (getWinner().equals("O") ? "Bot wins!" : "Draw!")));
-                finished = true;
+        playerWins.setText("Player wins: 0");
+        botWins.setText("Bot wins: 0");
+
+        new Timer(200, action -> {
+            if (!"None".equals(getWinner())) {
+                String winner = getWinner().equals("X") ? "Player wins!" : (getWinner().equals("O") ? "Bot wins!" : "Draw!");
+                new Thread(() -> JOptionPane.showMessageDialog(null, winner)).start();
+
+                switch (winner) {
+                    case "Player wins!" -> playerWins.setText("Player wins: " + ++wins[0]);
+                    case "Bot wins!" -> botWins.setText("Bot wins: " + ++wins[1]);
+                }
+
+                buttons.forEach(button -> button.setText(""));
             }
         }).start();
 
@@ -34,7 +48,7 @@ public class Gui extends JFrame {
         this.getContentPane().setBackground(Color.LIGHT_GRAY);
 
         for (int i = 0; i < 9; i++) {
-            JButton button = new Button().transparent().get();
+            JButton button = new Button().panel().get();
 
             buttons.add(button);
         }
@@ -43,7 +57,8 @@ public class Gui extends JFrame {
             button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (!"None".equals(getWinner()) || ready || (Objects.equals(button.getText(), "O") || Objects.equals(button.getText(), "X"))) return;
+                    if (!"None".equals(getWinner()) || ready || (Objects.equals(button.getText(), "O") || Objects.equals(button.getText(), "X")))
+                        return;
                     button.setText("X");
                     button.setFont(font);
                     ready = true;
@@ -54,7 +69,8 @@ public class Gui extends JFrame {
                             List<JButton> empty = buttons.stream().filter(button -> button.getText().isEmpty()).toList();
                             if (empty.isEmpty()) return;
 
-                            JButton button = empty.get(new Random().nextInt(empty.size() - 1));
+                            int size = empty.size() - 1;
+                            JButton button = empty.get(new Random().nextInt(size < 1 ? empty.size() : size));
                             button.setText("O");
                             button.setFont(font);
 
@@ -69,6 +85,10 @@ public class Gui extends JFrame {
         }
 
         for (JButton button : buttons) this.add(button);
+        jMenuBar.add(playerWins);
+        jMenuBar.add(Box.createHorizontalGlue());
+        jMenuBar.add(botWins);
+        this.setJMenuBar(jMenuBar);
         this.setLayout(new GridLayout(3, 3));
         this.setVisible(true);
     }
@@ -83,7 +103,7 @@ public class Gui extends JFrame {
                 // Vertical
                 List.of(1, 4, 7),
                 List.of(2, 5, 8),
-                List.of(3, 6, 7),
+                List.of(3, 6, 9),
 
                 // Diagonal
                 List.of(1, 5, 9),
